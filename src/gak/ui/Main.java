@@ -10,6 +10,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -18,8 +19,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Objects;
 
 import static gak.ui.UiBuilder.*;
 
@@ -45,6 +46,7 @@ public class Main extends Application {
         pane = new BorderPane();
         scene = new Scene(pane);
         accelerators = scene.getAccelerators();
+        pane.requestFocus();
         SimpleListProperty<String> strings = buttonController.dataProperty();
         data.bindBidirectional(strings);
     }
@@ -54,6 +56,7 @@ public class Main extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
+
         pane.setPadding(new Insets(0, 5, 0, 5));
         // 初始化方法
         initTop();
@@ -62,10 +65,12 @@ public class Main extends Application {
         initRight();
 
         // 设置画布
-        primaryStage.setScene(scene);
-        primaryStage.show();
-        primaryStage.setTitle("Gak 的小小计算器");
         primaryStage.setResizable(false);
+        Image icon = new Image(getClass().getResourceAsStream("img" + File.separator + "icon.png"));
+        primaryStage.getIcons().add(icon);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Gak 的小小计算器");
+        primaryStage.show();
     }
 
 
@@ -78,8 +83,11 @@ public class Main extends Application {
         textField.setMinHeight(50);
         textField.setAlignment(Pos.CENTER_RIGHT);
         textField.setFont(Font.font(null, FontWeight.BOLD, 20));
-        textField.setOnMouseClicked(event -> textField.selectAll());
+//        textField.setOnMouseClicked(event -> pane.requestFocus());
         textField.textProperty().bindBidirectional(buttonController.textPropertyProperty());
+//        textField.setEditable(false);
+//        textField.focusTraversableProperty().set(false);
+
         // 设置菜单栏
         MenuBar menuBar = new MenuBar();
         Menu file = new Menu("文件");
@@ -95,13 +103,11 @@ public class Main extends Application {
         file.getItems().addAll(exportFile, importFile);
         menu.getChildren().add(menuBar);
         menu.getChildren().add(textField);
-
         pane.setTop(menu);
     }
 
     private void initLeft() {
         GridPane left = buildGridPane(10, 10, 10, 0, 10, 5);
-
         Button sin = getButton("Sin", "正弦", true, 0, 0);
         Button cos = getButton("Cos", "余弦", true, 0, 1);
         Button tan = getButton("Tan", "正切", true, 0, 2);
@@ -178,19 +184,16 @@ public class Main extends Application {
         accelerators.put(new KeyCodeCombination(KeyCode.DIVIDE), divide::fire);
         accelerators.put(new KeyCodeCombination(KeyCode.ENTER), equal::fire);
         accelerators.put(new KeyCodeCombination(KeyCode.PERIOD), point::fire);
+        accelerators.put(new KeyCodeCombination(KeyCode.DECIMAL), point::fire);
 
         // 其他设置以及添加容器
         add.setMinSize(40, 90);
         equal.setMinSize(40, 90);
         equal.setOnAction(buttonController::equalEvent);
-
-        // 事件
-        textField.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                equal.fire();
-            }
+        buttonController.setOnSucceeded(event -> {
+            textField.selectPositionCaret(textField.getText().length());
+            textField.deselect();
         });
-
         pane.setCenter(center);
     }
 
@@ -211,11 +214,12 @@ public class Main extends Application {
 
         delete.setMinSize(90, 40);
         chart.setMinSize(90, 40);
-        right.getChildren().addAll(delete, negate, leftBracket, rightBracket, chart, ms, mr, deleteAll);
+        right.getChildren().addAll(delete, negate, leftBracket, rightBracket, deleteAll, ms, mr, chart);
 
         accelerators.put(new KeyCodeCombination(KeyCode.DIGIT9, KeyCombination.SHIFT_DOWN), leftBracket::fire);
         accelerators.put(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHIFT_DOWN), rightBracket::fire);
         accelerators.put(new KeyCodeCombination(KeyCode.BACK_SPACE), delete::fire);
+        accelerators.put(new KeyCodeCombination(KeyCode.ESCAPE), deleteAll::fire);
         accelerators.put(new KeyCodeCombination(KeyCode.BACK_SPACE, KeyCombination.SHIFT_DOWN), deleteAll::fire);
 
         buttonController.optionAddEvent(negate, leftBracket, rightBracket);

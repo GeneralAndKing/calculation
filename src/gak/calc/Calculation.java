@@ -19,9 +19,8 @@ public class Calculation {
 
     public static void main(String[] args) {
         Calculation demo = new Calculation();
-//        System.out.println(demo.calculate("negate(50000!)+50000!"));
-//        System.out.println(demo.calculate("cos(3)"));
-        System.out.println(KeyCode.NUMPAD1);
+        System.out.println(demo.calculate("negate(50000!)+50000!"));
+        System.out.println(demo.calculate("cos(3)"));
     }
 
     /**

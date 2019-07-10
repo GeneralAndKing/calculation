@@ -2,6 +2,8 @@ package gak.controller;
 
 import gak.calc.Calculation;
 import gak.ui.ChartPane;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -80,7 +82,7 @@ public class ButtonController extends Service<String> {
         Button button = (Button) event.getSource();
         String field = button.getText();
         // 如果为初始状态或者为以及成功计算完毕的状态需要进行清空
-        if (textProperty.isEqualTo("0").get() || isResult) {
+        if (textProperty.isEqualTo("0").or(textProperty.isEqualTo("error")).get() || isResult) {
             textProperty.set(field);
             isResult = false;
         } else {
@@ -121,13 +123,16 @@ public class ButtonController extends Service<String> {
         try {
             // 忽略初始时报错（不影响运行）
             reset();
+            start();
         } catch (Exception ignored) {
         }
-        start();
+        String express = textProperty.get();
         valueProperty().addListener((ObservableValue<? extends String> observable,
                                      String oldValue, String newValue) -> {
             if (Objects.nonNull(newValue)) {
+                isResult = true;
                 textProperty.set(newValue);
+                data.add(String.format("%s=%s", express, newValue));
             }
         });
     }
@@ -165,10 +170,8 @@ public class ButtonController extends Service<String> {
         return textProperty;
     }
 
-
     public SimpleListProperty<String> dataProperty() {
         return data;
     }
-
 
 }
