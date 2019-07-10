@@ -4,8 +4,9 @@ import gak.calc.Calculation;
 import gak.ui.ChartPane;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.concurrent.ScheduledService;
+import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
@@ -14,6 +15,7 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -22,10 +24,10 @@ import java.util.Optional;
  * @author <a href="https://echocow.cn">EchoCow</a>
  * @date 19-7-9 上午11:43
  */
-public class ButtonController extends ScheduledService<String> {
+public class ButtonController extends Service<String> {
     private boolean isResult;
     private SimpleStringProperty textProperty;
-    private Calculation calculation ;
+    private Calculation calculation;
     private SimpleListProperty<String> data;
     private String memory = "";
 
@@ -83,7 +85,6 @@ public class ButtonController extends ScheduledService<String> {
             isResult = false;
         } else {
             textProperty.set(textProperty.concat(field).get());
-            ;
         }
     }
 
@@ -107,6 +108,9 @@ public class ButtonController extends ScheduledService<String> {
             textProperty.set(textProperty.concat(button.getText().toLowerCase() + "(").get());
         } else if (userData instanceof String) {
             textProperty.set(textProperty.concat(userData.toString()).get());
+            if ("negate".equalsIgnoreCase(userData.toString())) {
+                textProperty.set(textProperty.concat("(").get());
+            }
         } else if (userData == null) {
             textProperty.set(textProperty.concat(button.getText()).get());
         }
@@ -114,7 +118,15 @@ public class ButtonController extends ScheduledService<String> {
     }
 
     public void equalEvent(ActionEvent actionEvent) {
+        reset();
         start();
+        valueProperty().addListener((ObservableValue<? extends String> observable,
+                                     String oldValue,
+                                     String newValue) -> {
+            if (Objects.nonNull(newValue)) {
+                textProperty.set(newValue);
+            }
+        });
     }
 
     public void deleteEvent(ActionEvent actionEvent) {
@@ -141,20 +153,7 @@ public class ButtonController extends ScheduledService<String> {
         return new Task<String>() {
             @Override
             protected String call() throws Exception {
-                String expression = textProperty.get();
-                String res = calculation.calculate(expression);
-                updateValue(res);
-                textProperty.set(res);
-                data.add(expression + "=" + res);
-                isResult = true;
-                cancel();
-                return "Test";
-            }
-
-            @Override
-            protected void updateValue(String value) {
-                super.updateValue(value);
-                textProperty.set(value);
+                return calculation.calculate(textProperty.get());
             }
         };
     }
