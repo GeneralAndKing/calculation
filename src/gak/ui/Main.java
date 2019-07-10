@@ -3,6 +3,8 @@ package gak.ui;
 import gak.controller.ButtonController;
 import gak.controller.FileController;
 import javafx.application.Application;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
@@ -21,6 +23,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static gak.ui.UiBuilder.*;
 
@@ -28,12 +31,15 @@ import static gak.ui.UiBuilder.*;
  * 图形界面主界面
  */
 public class Main extends Application {
+    private Scene scene;
     private BorderPane pane;
+    private BorderPane main;
+    private BorderPane list;
+    private Button equal;
     private TextField textField;
     private SimpleListProperty<String> data;
     private FileController fileController;
     private ButtonController buttonController;
-    private Scene scene;
     private ObservableMap<KeyCombination, Runnable> accelerators;
 
 
@@ -44,9 +50,14 @@ public class Main extends Application {
         fileController.setData(data);
         textField = new TextField("0");
         pane = new BorderPane();
+        main = new BorderPane();
+        list = new BorderPane();
+        main.setPadding(new Insets(0, 5, 0, 5));
+        pane.setCenter(main);
+        pane.setRight(list);
         scene = new Scene(pane);
         accelerators = scene.getAccelerators();
-        pane.requestFocus();
+        main.requestFocus();
         SimpleListProperty<String> strings = buttonController.dataProperty();
         data.bindBidirectional(strings);
     }
@@ -56,16 +67,16 @@ public class Main extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
-
-        pane.setPadding(new Insets(0, 5, 0, 5));
         // 初始化方法
         initTop();
+        initText();
         initLeft();
         initCenter();
         initRight();
+        initResult();
 
         // 设置画布
-        primaryStage.setResizable(false);
+//        primaryStage.setResizable(false);
         Image icon = new Image(getClass().getResourceAsStream("img" + File.separator + "icon.png"));
         primaryStage.getIcons().add(icon);
         primaryStage.setScene(scene);
@@ -73,28 +84,37 @@ public class Main extends Application {
         primaryStage.show();
     }
 
+    private void initResult() {
+        ListView<String> list = new ListView<>();
+        list.setItems(data);
+        list.setPrefWidth(150);
+        list.setPrefHeight(70);
+        list.setOnMouseClicked(buttonController::listEvent);
+        list.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                equal.fire();
+                return;
+            }
+            if (event.getCode() == KeyCode.DELETE) {
+                String selectedItem = list.getSelectionModel().getSelectedItem();
+                if (Objects.nonNull(selectedItem)) {
+                    data.remove(selectedItem);
+                }
+            }
+        });
+        pane.setRight(list);
+    }
 
     /**
-     * 初始化顶部菜单栏以及显示数据框
+     * 初始化顶部
      */
     private void initTop() {
         VBox menu = new VBox();
-        // 显示设置
-        textField.setMinHeight(50);
-        textField.setAlignment(Pos.CENTER_RIGHT);
-        textField.setFont(Font.font(null, FontWeight.BOLD, 20));
-//        textField.setOnMouseClicked(event -> pane.requestFocus());
-        textField.textProperty().bindBidirectional(buttonController.textPropertyProperty());
-//        textField.setEditable(false);
-//        textField.focusTraversableProperty().set(false);
-
-        // 设置菜单栏
         MenuBar menuBar = new MenuBar();
         Menu file = new Menu("文件");
         menuBar.getMenus().add(file);
         MenuItem exportFile = new MenuItem("导出");
         MenuItem importFile = new MenuItem("导入");
-
         // 快捷键以及事件处理
         exportFile.setAccelerator(KeyCombination.keyCombination("Ctrl+E"));
         exportFile.setOnAction(fileController::exportFile);
@@ -102,8 +122,24 @@ public class Main extends Application {
         importFile.setOnAction(fileController::importFile);
         file.getItems().addAll(exportFile, importFile);
         menu.getChildren().add(menuBar);
-        menu.getChildren().add(textField);
+
         pane.setTop(menu);
+    }
+
+
+    /**
+     * 初始化显示数据框
+     */
+    private void initText() {
+        // 显示设置
+        textField.setMinHeight(50);
+        textField.setAlignment(Pos.CENTER_RIGHT);
+        textField.setFont(Font.font(null, FontWeight.BOLD, 20));
+        textField.textProperty().bindBidirectional(buttonController.textPropertyProperty());
+//        textField.setOnMouseClicked(event -> main.requestFocus());
+//        textField.setEditable(false);
+//        textField.focusTraversableProperty().set(false);
+        main.setTop(textField);
     }
 
     private void initLeft() {
@@ -136,7 +172,7 @@ public class Main extends Application {
                 sin, cos, tan, log, ln, squareRoot, ySquareRoot,
                 rec, fac, square, cube, xy, ex, ten);
 
-        pane.setLeft(left);
+        main.setLeft(left);
     }
 
     /**
@@ -170,7 +206,7 @@ public class Main extends Application {
         Button multiply = getButton("×", "乘法", 2, 0);
         Button subtract = getButton("-", "减法", 3, 0);
         Button add = getButton("+", "加法", 3, 1, 1, 2);
-        Button equal = getButton("=", "结果", 3, 3, 1, 2);
+        equal = getButton("=", "结果", 3, 3, 1, 2);
         Button point = getButton(".", 2, 4);
         center.getChildren().addAll(remainder, divide, multiply, subtract, add, equal, point);
         buttonController.optionAddEvent(remainder, divide, multiply, subtract, add, equal, point);
@@ -194,7 +230,7 @@ public class Main extends Application {
             textField.selectPositionCaret(textField.getText().length());
             textField.deselect();
         });
-        pane.setCenter(center);
+        main.setCenter(center);
     }
 
     /**
@@ -228,7 +264,7 @@ public class Main extends Application {
         chart.setOnAction(buttonController::chooseChart);
         ms.setOnAction(buttonController::msEvent);
         mr.setOnAction(buttonController::mrEvent);
-        pane.setRight(right);
+        main.setRight(right);
     }
 
 }

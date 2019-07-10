@@ -13,6 +13,9 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.ListView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -126,15 +129,6 @@ public class ButtonController extends Service<String> {
             start();
         } catch (Exception ignored) {
         }
-        String express = textProperty.get();
-        valueProperty().addListener((ObservableValue<? extends String> observable,
-                                     String oldValue, String newValue) -> {
-            if (Objects.nonNull(newValue)) {
-                isResult = true;
-                textProperty.set(newValue);
-                data.add(String.format("%s=%s", express, newValue));
-            }
-        });
     }
 
     public void deleteEvent(ActionEvent actionEvent) {
@@ -156,12 +150,45 @@ public class ButtonController extends Service<String> {
         textProperty.set(textProperty.concat(memory).get());
     }
 
+    @SuppressWarnings("unchecked")
+    public void listEvent(MouseEvent event) {
+        ListView<String> list = (ListView<String>) event.getSource();
+        if (event.getButton().equals(MouseButton.PRIMARY)) {
+            String selectedItem = list.getSelectionModel().getSelectedItem();
+            if (Objects.isNull(selectedItem)) {
+                return;
+            }
+            int index = selectedItem.indexOf("=");
+            if (index == -1) {
+                return;
+            }
+            if (event.getClickCount() == 1) {
+                textProperty.set(selectedItem.substring(index + 1));
+            }
+            if (event.getClickCount() == 2) {
+                textProperty.set(selectedItem.substring(0, index));
+            }
+        }
+    }
+
+    @Override
+    protected void succeeded() {
+        super.succeeded();
+        String express = textProperty.get();
+        String message = getMessage();
+        textProperty.set(message);
+        isResult = true;
+        data.add(String.format("%s=%s", express, message));
+    }
+
     @Override
     protected Task<String> createTask() {
         return new Task<String>() {
             @Override
-            protected String call() throws Exception {
-                return calculation.calculate(textProperty.get());
+            protected String call() {
+                String result = calculation.calculate(textProperty.get());
+                updateMessage(result);
+                return result;
             }
         };
     }
