@@ -11,11 +11,10 @@ import javafx.collections.FXCollections;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -64,11 +63,11 @@ public class ButtonController extends Service<String> {
         dialog.setContentText("图表函数");
 
 //        担心由于计算过多造成图表加载卡慢，暂时不做
-//        HBox expContent = new HBox();
-//        Label label = new Label("生成点的数：");
-//        TextField number = new TextField("20");
-//        expContent.getChildren().addAll(label, number);
-//        dialog.getDialogPane().setExpandableContent(expContent);
+        HBox expContent = new HBox();
+        Label label = new Label("生成点的数：");
+        TextField number = new TextField("20");
+        expContent.getChildren().addAll(label, number);
+        dialog.getDialogPane().setExpandableContent(expContent);
 
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(s -> {

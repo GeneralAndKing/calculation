@@ -1,0 +1,26 @@
+* {
+    -fx-background-color: #282828;
+    -fx-text-fill: white;
+}
+.button {
+    -fx-background-color: #414141;
+    -fx-text-fill: white;
+    -fx-border-color: #878787;
+    -fx-background-radius: 10;
+}
+.button:hover {
+    -fx-border-color: #7b97d4;
+}
+.text-field {
+    -fx-border-color: #878787;
+}
+.list-view {
+    -fx-border-color: #878787;
+}
+.list-view:selected, .list-cell:selected  {
+    -fx-background-color: #63acff;
+}
+.list-view .scroll-bar:vertical,
+.list-view .scroll-bar:horizontal{
+    -fx-background-color: #ffffff;
+}

@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.geometry.Insets;
@@ -56,6 +57,7 @@ public class Main extends Application {
         pane.setCenter(main);
         pane.setRight(list);
         scene = new Scene(pane);
+        scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         accelerators = scene.getAccelerators();
         main.requestFocus();
         SimpleListProperty<String> strings = buttonController.dataProperty();
@@ -76,7 +78,7 @@ public class Main extends Application {
         initResult();
 
         // 设置画布
-//        primaryStage.setResizable(false);
+        primaryStage.setResizable(false);
         Image icon = new Image(getClass().getResourceAsStream("img" + File.separator + "icon.png"));
         primaryStage.getIcons().add(icon);
         primaryStage.setScene(scene);
@@ -111,7 +113,7 @@ public class Main extends Application {
     private void initTop() {
         VBox menu = new VBox();
         MenuBar menuBar = new MenuBar();
-        Menu file = new Menu("文件");
+        Menu file = new Menu("文件(F)");
         menuBar.getMenus().add(file);
         MenuItem exportFile = new MenuItem("导出");
         MenuItem importFile = new MenuItem("导入");
@@ -136,6 +138,11 @@ public class Main extends Application {
         textField.setAlignment(Pos.CENTER_RIGHT);
         textField.setFont(Font.font(null, FontWeight.BOLD, 20));
         textField.textProperty().bindBidirectional(buttonController.textPropertyProperty());
+        textField.textProperty().addListener((ObservableValue<? extends String> observable,
+                                              String oldValue, String newValue) -> {
+            textField.selectPositionCaret(textField.getText().length());
+            textField.deselect();
+        });
 //        textField.setOnMouseClicked(event -> main.requestFocus());
 //        textField.setEditable(false);
 //        textField.focusTraversableProperty().set(false);
@@ -248,6 +255,8 @@ public class Main extends Application {
         Button ms = getButton("MS", "记忆输入框值", 1, 2);
         Button mr = getButton("MR", "取出输入框值", 1, 3);
 
+        ms.setFont(Font.font(null, 12));
+        mr.setFont(Font.font(null, 12));
         delete.setMinSize(90, 40);
         chart.setMinSize(90, 40);
         right.getChildren().addAll(delete, negate, leftBracket, rightBracket, deleteAll, ms, mr, chart);
