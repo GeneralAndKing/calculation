@@ -5,12 +5,12 @@ import gak.controller.FileController;
 import javafx.application.Application;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCombination;
+import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -19,6 +19,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static gak.ui.UiBuilder.*;
 
@@ -31,6 +32,8 @@ public class Main extends Application {
     private SimpleListProperty<String> data;
     private FileController fileController;
     private ButtonController buttonController;
+    private Scene scene;
+    private ObservableMap<KeyCombination, Runnable> accelerators;
 
 
     public Main() {
@@ -40,6 +43,8 @@ public class Main extends Application {
         fileController.setData(data);
         textField = new TextField("0");
         pane = new BorderPane();
+        scene = new Scene(pane);
+        accelerators = scene.getAccelerators();
         SimpleListProperty<String> strings = buttonController.dataProperty();
         data.bindBidirectional(strings);
     }
@@ -57,7 +62,6 @@ public class Main extends Application {
         initRight();
 
         // 设置画布
-        Scene scene = new Scene(pane);
         primaryStage.setScene(scene);
         primaryStage.show();
         primaryStage.setTitle("Gak 的小小计算器");
@@ -148,13 +152,13 @@ public class Main extends Application {
             Button button = getButton(String.valueOf(i), numberLocation[i][0], numberLocation[i][1]);
             numbers.add(button);
             button.setOnAction(buttonController::numberEvent);
+            accelerators.put(new KeyCodeCombination(KeyCode.getKeyCode("Numpad " + i)), button::fire);
+            accelerators.put(new KeyCodeCombination(KeyCode.getKeyCode(String.valueOf(i))), button::fire);
         }
         numbers.get(0).setMinSize(90, 40);
         GridPane.setConstraints(numbers.get(0), numberLocation[0][0], numberLocation[0][1], 2, 1);
         center.getChildren().addAll(numbers);
-
         // 操作按键的初始化
-
         Button remainder = getButton("%", "取模", 0, 0);
         Button divide = getButton("÷", "除法", 1, 0);
         Button multiply = getButton("×", "乘法", 2, 0);
@@ -165,6 +169,16 @@ public class Main extends Application {
         center.getChildren().addAll(remainder, divide, multiply, subtract, add, equal, point);
         buttonController.optionAddEvent(remainder, divide, multiply, subtract, add, equal, point);
 
+        accelerators.put(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHIFT_DOWN), add::fire);
+        accelerators.put(new KeyCodeCombination(KeyCode.ADD), add::fire);
+        accelerators.put(new KeyCodeCombination(KeyCode.MINUS), subtract::fire);
+        accelerators.put(new KeyCodeCombination(KeyCode.SUBTRACT), subtract::fire);
+        accelerators.put(new KeyCodeCombination(KeyCode.MULTIPLY), multiply::fire);
+        accelerators.put(new KeyCodeCombination(KeyCode.SLASH), divide::fire);
+        accelerators.put(new KeyCodeCombination(KeyCode.DIVIDE), divide::fire);
+        accelerators.put(new KeyCodeCombination(KeyCode.ENTER), equal::fire);
+        accelerators.put(new KeyCodeCombination(KeyCode.PERIOD), point::fire);
+
         // 其他设置以及添加容器
         add.setMinSize(40, 90);
         equal.setMinSize(40, 90);
@@ -174,7 +188,6 @@ public class Main extends Application {
         textField.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 equal.fire();
-
             }
         });
 
@@ -200,6 +213,11 @@ public class Main extends Application {
         chart.setMinSize(90, 40);
         right.getChildren().addAll(delete, negate, leftBracket, rightBracket, chart, ms, mr, deleteAll);
 
+        accelerators.put(new KeyCodeCombination(KeyCode.DIGIT9, KeyCombination.SHIFT_DOWN), leftBracket::fire);
+        accelerators.put(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHIFT_DOWN), rightBracket::fire);
+        accelerators.put(new KeyCodeCombination(KeyCode.BACK_SPACE), delete::fire);
+        accelerators.put(new KeyCodeCombination(KeyCode.BACK_SPACE, KeyCombination.SHIFT_DOWN), deleteAll::fire);
+
         buttonController.optionAddEvent(negate, leftBracket, rightBracket);
         delete.setOnAction(buttonController::deleteEvent);
         deleteAll.setOnAction(event -> textField.setText("0"));
@@ -208,6 +226,5 @@ public class Main extends Application {
         mr.setOnAction(buttonController::mrEvent);
         pane.setRight(right);
     }
-
 
 }

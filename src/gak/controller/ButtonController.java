@@ -118,11 +118,14 @@ public class ButtonController extends Service<String> {
     }
 
     public void equalEvent(ActionEvent actionEvent) {
-        reset();
+        try {
+            // 忽略初始时报错（不影响运行）
+            reset();
+        } catch (Exception ignored) {
+        }
         start();
         valueProperty().addListener((ObservableValue<? extends String> observable,
-                                     String oldValue,
-                                     String newValue) -> {
+                                     String oldValue, String newValue) -> {
             if (Objects.nonNull(newValue)) {
                 textProperty.set(newValue);
             }
