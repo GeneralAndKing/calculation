@@ -273,7 +273,7 @@ public class Main extends Application {
         buttonController.optionAddEvent(negate, leftBracket, rightBracket);
         delete.setOnAction(buttonController::deleteEvent);
         deleteAll.setOnAction(event -> textField.setText("0"));
-        chart.setOnAction(buttonController::chooseChart);
+        chart.setOnAction(UiBuilder::chooseChart);
         ms.setOnAction(buttonController::msEvent);
         mr.setOnAction(buttonController::mrEvent);
         main.setRight(right);
