@@ -61,6 +61,7 @@ public class ButtonController extends Service<String> {
         dialog.setTitle("选择函数");
         dialog.setHeaderText("请选择您需要生成图表的函数");
         dialog.setContentText("图表函数");
+        dialog.setResizable(true);
 
 //        担心由于计算过多造成图表加载卡慢，暂时不做
         HBox expContent = new HBox();
@@ -116,7 +117,11 @@ public class ButtonController extends Service<String> {
                 textProperty.set(textProperty.concat("(").get());
             }
         } else if (userData == null) {
-            textProperty.set(textProperty.concat(button.getText()).get());
+            if ("(".equalsIgnoreCase(button.getText()) && "0".equalsIgnoreCase(textProperty.get())) {
+                textProperty.set("(");
+            } else {
+                textProperty.set(textProperty.concat(button.getText()).get());
+            }
         }
         isResult = false;
     }

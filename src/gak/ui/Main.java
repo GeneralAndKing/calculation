@@ -17,6 +17,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -24,7 +25,9 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static gak.ui.UiBuilder.*;
 
@@ -35,7 +38,6 @@ public class Main extends Application {
     private Scene scene;
     private BorderPane pane;
     private BorderPane main;
-    private BorderPane list;
     private Button equal;
     private TextField textField;
     private SimpleListProperty<String> data;
@@ -52,10 +54,8 @@ public class Main extends Application {
         textField = new TextField("0");
         pane = new BorderPane();
         main = new BorderPane();
-        list = new BorderPane();
         main.setPadding(new Insets(0, 5, 0, 5));
         pane.setCenter(main);
-        pane.setRight(list);
         scene = new Scene(pane);
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         accelerators = scene.getAccelerators();
@@ -81,6 +81,8 @@ public class Main extends Application {
         primaryStage.setResizable(false);
         Image icon = new Image(getClass().getResourceAsStream("img" + File.separator + "icon.png"));
         primaryStage.getIcons().add(icon);
+        primaryStage.setMinWidth(600);
+        primaryStage.setMinHeight(338);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Gak 的小小计算器");
         primaryStage.show();
@@ -88,9 +90,10 @@ public class Main extends Application {
 
     private void initResult() {
         ListView<String> list = new ListView<>();
+        list.setPadding(new Insets(0, 5, 0, 5));
         list.setItems(data);
         list.setPrefWidth(150);
-        list.setPrefHeight(70);
+        list.setMaxHeight(300);
         list.setOnMouseClicked(buttonController::listEvent);
         list.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
