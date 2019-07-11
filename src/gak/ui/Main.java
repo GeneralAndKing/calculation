@@ -183,7 +183,7 @@ public class Main extends Application {
         Button ex = getButton("eˣ", "e的x次方", "e^", 1, 5);
         Button ten = getButton("10ˣ", "10的x次方", "10^", 1, 6);
 
-        accelerators.put(new KeyCodeCombination(KeyCode.DIGIT1, KeyCombination.SHIFT_DOWN), fac::fire);
+//        accelerators.put(new KeyCodeCombination(KeyCode.DIGIT1, KeyCombination.SHIFT_DOWN), fac::fire);
 
         left.getChildren().addAll(
                 sin, cos, tan, log, ln, squareRoot, ySquareRoot,
@@ -227,8 +227,8 @@ public class Main extends Application {
         center.getChildren().addAll(numbers);
         // 操作按键的初始化
         Button remainder = getButton("%", "取模", 0, 0);
-        Button divide = getButton("÷", "除法", 1, 0);
-        Button multiply = getButton("×", "乘法", 2, 0);
+        Button divide = getButton("/", "除法", 1, 0);
+        Button multiply = getButton("*", "乘法", 2, 0);
         Button subtract = getButton("-", "减法", 3, 0);
         Button add = getButton("+", "加法", 3, 1, 1, 2);
         equal = getButton("=", "结果", 3, 3, 1, 2);
@@ -236,7 +236,7 @@ public class Main extends Application {
         center.getChildren().addAll(remainder, divide, multiply, subtract, add, equal, point);
         buttonController.optionAddEvent(remainder, divide, multiply, subtract, add, equal, point);
 
-        accelerators.put(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHIFT_DOWN), add::fire);
+//        accelerators.put(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHIFT_DOWN), add::fire);
         accelerators.put(new KeyCodeCombination(KeyCode.ADD), add::fire);
         accelerators.put(new KeyCodeCombination(KeyCode.MINUS), subtract::fire);
         accelerators.put(new KeyCodeCombination(KeyCode.SUBTRACT), subtract::fire);
@@ -282,8 +282,8 @@ public class Main extends Application {
         chart.setMinSize(90, 40);
         right.getChildren().addAll(delete, negate, leftBracket, rightBracket, deleteAll, ms, mr, chart);
 
-        accelerators.put(new KeyCodeCombination(KeyCode.DIGIT9, KeyCombination.SHIFT_DOWN), leftBracket::fire);
-        accelerators.put(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHIFT_DOWN), rightBracket::fire);
+//        accelerators.put(new KeyCodeCombination(KeyCode.DIGIT9, KeyCombination.SHIFT_DOWN), leftBracket::fire);
+//        accelerators.put(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHIFT_DOWN), rightBracket::fire);
         accelerators.put(new KeyCodeCombination(KeyCode.BACK_SPACE), delete::fire);
         accelerators.put(new KeyCodeCombination(KeyCode.ESCAPE), deleteAll::fire);
         accelerators.put(new KeyCodeCombination(KeyCode.BACK_SPACE, KeyCombination.SHIFT_DOWN), deleteAll::fire);
