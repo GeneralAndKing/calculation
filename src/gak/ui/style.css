@@ -1,26 +1,55 @@
-* {
+.menu, .menu-bar, .menu-item, .text-field, .grid-pane,
+.list-view, .list-cell, .label, .calc {
     -fx-background-color: #282828;
     -fx-text-fill: white;
 }
+
+.white-font {
+    -fx-text-fill: white;
+}
+
 .button {
     -fx-background-color: #414141;
     -fx-text-fill: white;
     -fx-border-color: #878787;
     -fx-background-radius: 10;
 }
+
 .button:hover {
     -fx-border-color: #7b97d4;
 }
+
 .text-field {
     -fx-border-color: #878787;
 }
+
 .list-view {
     -fx-border-color: #878787;
 }
-.list-view:selected, .list-cell:selected  {
+
+.list-view:selected, .list-cell:selected {
     -fx-background-color: #63acff;
+    -fx-fill: #63acff;
 }
+
+.menu, .menu-item, .menu-button {
+    -fx-border-color: #282828;
+    -fx-background-color: #282828;
+
+}
+
+.menu, .menu * {
+    -fx-text-fill: white;
+    -fx-border-width: 0;
+}
+
+.menu-item:hover, .menu-button:hover {
+    -fx-background-color: #63acff;
+    -fx-fill: #63acff;
+    -fx-text-fill: white;
+}
+
 .list-view .scroll-bar:vertical,
-.list-view .scroll-bar:horizontal{
+.list-view .scroll-bar:horizontal {
     -fx-background-color: #ffffff;
 }

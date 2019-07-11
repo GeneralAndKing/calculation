@@ -1,33 +1,31 @@
 package gak.ui;
 
+import gak.bean.ChartBean;
 import gak.controller.ButtonController;
 import gak.controller.FileController;
 import javafx.application.Application;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
+import javax.sound.midi.Sequence;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import static gak.ui.UiBuilder.*;
 
@@ -36,6 +34,7 @@ import static gak.ui.UiBuilder.*;
  */
 public class Main extends Application {
     private Scene scene;
+    private Stage primaryStage;
     private BorderPane pane;
     private BorderPane main;
     private Button equal;
@@ -54,6 +53,8 @@ public class Main extends Application {
         textField = new TextField("0");
         pane = new BorderPane();
         main = new BorderPane();
+        pane.getStyleClass().add("calc");
+        main.getStyleClass().add("calc");
         main.setPadding(new Insets(0, 5, 0, 5));
         pane.setCenter(main);
         scene = new Scene(pane);
@@ -69,6 +70,7 @@ public class Main extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
+        this.primaryStage = primaryStage;
         // 初始化方法
         initTop();
         initText();
@@ -114,10 +116,8 @@ public class Main extends Application {
      * 初始化顶部
      */
     private void initTop() {
-        VBox menu = new VBox();
         MenuBar menuBar = new MenuBar();
         Menu file = new Menu("文件(F)");
-        menuBar.getMenus().add(file);
         MenuItem exportFile = new MenuItem("导出");
         MenuItem importFile = new MenuItem("导入");
         // 快捷键以及事件处理
@@ -126,9 +126,9 @@ public class Main extends Application {
         importFile.setAccelerator(KeyCombination.keyCombination("Ctrl+R"));
         importFile.setOnAction(fileController::importFile);
         file.getItems().addAll(exportFile, importFile);
-        menu.getChildren().add(menuBar);
-
-        pane.setTop(menu);
+        menuBar.getMenus().add(file);
+        menuBar.setPadding(new Insets(2));
+        pane.setTop(menuBar);
     }
 
 
@@ -138,7 +138,7 @@ public class Main extends Application {
     private void initText() {
         // 显示设置
         textField.setMinHeight(50);
-        textField.setAlignment(Pos.CENTER_RIGHT);
+        textField.setAlignment(Pos.CENTER_LEFT);
         textField.setFont(Font.font(null, FontWeight.BOLD, 20));
         textField.textProperty().bindBidirectional(buttonController.textPropertyProperty());
         textField.textProperty().addListener((ObservableValue<? extends String> observable,
@@ -146,9 +146,6 @@ public class Main extends Application {
             textField.selectPositionCaret(textField.getText().length());
             textField.deselect();
         });
-//        textField.setOnMouseClicked(event -> main.requestFocus());
-//        textField.setEditable(false);
-//        textField.focusTraversableProperty().set(false);
         main.setTop(textField);
     }
 
@@ -169,6 +166,8 @@ public class Main extends Application {
         Button xy = getButton("xʸ", "y次方", "^", 1, 4);
         Button ex = getButton("eˣ", "e的x次方", "e^", 1, 5);
         Button ten = getButton("10ˣ", "10的x次方", "10^", 1, 6);
+
+        accelerators.put(new KeyCodeCombination(KeyCode.DIGIT1, KeyCombination.SHIFT_DOWN), fac::fire);
 
         left.getChildren().addAll(
                 sin, cos, tan, log, ln, squareRoot, ySquareRoot,
@@ -237,9 +236,12 @@ public class Main extends Application {
         equal.setMinSize(40, 90);
         equal.setOnAction(buttonController::equalEvent);
         buttonController.setOnSucceeded(event -> {
+            textField.setText(event.getSource().getMessage());
+            textField.requestFocus();
             textField.selectPositionCaret(textField.getText().length());
             textField.deselect();
         });
+
         main.setCenter(center);
     }
 
@@ -273,10 +275,69 @@ public class Main extends Application {
         buttonController.optionAddEvent(negate, leftBracket, rightBracket);
         delete.setOnAction(buttonController::deleteEvent);
         deleteAll.setOnAction(event -> textField.setText("0"));
-        chart.setOnAction(UiBuilder::chooseChart);
+        chart.setOnAction(this::chooseChart);
         ms.setOnAction(buttonController::msEvent);
         mr.setOnAction(buttonController::mrEvent);
         main.setRight(right);
+    }
+
+    /**
+     * 选择显示的图表
+     */
+    private void chooseChart(ActionEvent event) {
+        ObservableList<String> choices = FXCollections.observableArrayList(
+                "x²", "x³", "√x", "sin(x)", "cos(x)", "10ˣ", "eˣ", "2x", "-2x"
+        );
+        Dialog<ChartBean> dialog = new Dialog<>();
+        dialog.setTitle("选择函数");
+        dialog.setWidth(200);
+        dialog.setHeight(250);
+        dialog.initStyle(StageStyle.UTILITY);
+
+        FlowPane content = new FlowPane();
+        content.setAlignment(Pos.CENTER);
+        content.setPrefWidth(200);
+        content.setPadding(new Insets(5, 15, 5, 15));
+        content.setVgap(10);
+        content.setHgap(10);
+        content.getStyleClass().add("calc");
+
+        ChoiceBox<String> choiceBox = new ChoiceBox<>(choices);
+        choiceBox.setValue("x²");
+
+        TextField point = buildNumberInput("20", "点数");
+        TextField size = buildNumberInput("10", "大小");
+        TextField start = buildNumberInput("-10", "起始");
+        TextField end = buildNumberInput("10", "终止");
+
+        Label head = new Label("请选择您需要生成图表的函数");
+        head.setPadding(new Insets(5));
+        head.setFont(Font.font(15));
+        content.getChildren().add(head);
+        content.getChildren().addAll(new Label("请选择图表："), choiceBox);
+        content.getChildren().addAll(new Label("请输入点数："), point);
+        content.getChildren().addAll(new Label("数据点大小："), size);
+        content.getChildren().addAll(new Label("起始点范围："), start);
+        content.getChildren().addAll(new Label("终止点范围："), end);
+        dialog.getDialogPane().getStyleClass().add("calc");
+        dialog.getDialogPane().setContent(content);
+        dialog.setResizable(true);
+
+        ButtonType generate = new ButtonType("生成", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("取消", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().addAll(generate, cancel);
+        dialog.initOwner(primaryStage);
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == generate) {
+                return new ChartBean(
+                        choiceBox.getValue(),
+                        Integer.parseInt(point.getText()), Integer.parseInt(size.getText()),
+                        Integer.parseInt(start.getText()), Integer.parseInt(end.getText())
+                );
+            }
+            return null;
+        });
+        dialog.showAndWait().ifPresent(ChartPane::new);
     }
 
 }

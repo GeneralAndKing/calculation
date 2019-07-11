@@ -1,15 +1,16 @@
 package gak.ui;
 
+import gak.bean.ChartBean;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
+import java.util.function.*;
 
 import static java.lang.Math.*;
 
@@ -18,50 +19,47 @@ import static java.lang.Math.*;
  */
 class ChartPane {
     private Stage stage;
-    private Double stop;
+    private ChartBean chartBean;
     private LineChart<Number, Number> lineChart;
     private XYChart.Series<Number, Number> series = new XYChart.Series<>();
 
-    ChartPane(Stage stage, String type) {
-        this(stage, type, 20);
-    }
 
     /**
      * 初始化图表生成
      */
-    ChartPane(Stage stage, String type, Integer number) {
-        this.stage = stage;
-        this.stop = 20.0 / number;
-        init(type);
+    ChartPane(ChartBean chartBean) {
+        stage = new Stage();
+        this.chartBean = chartBean;
+        init();
         // 初始化图表数据
         series.getData().remove(0, series.getData().size() - 1);
-        switch (type) {
+        switch (chartBean.getType()) {
             case "x²":
-                showX2();
+                initPoint(i -> pow(i, 2));
                 break;
             case "x³":
-                showX3();
+                initPoint(i -> pow(i, 3));
                 break;
             case "√x":
-                showSqrtX();
+                initPoint(Math::sqrt);
                 break;
             case "10ˣ":
-                tenX();
+                initPoint(i -> pow(10, i));
                 break;
             case "eˣ":
-                ex();
+                initPoint(() -> E, i -> pow(E, i));
                 break;
             case "sin(x)":
-                sinX();
+                initPoint(Math::sin);
                 break;
             case "cos(x)":
-                cosX();
+                initPoint(Math::cos);
                 break;
             case "2x":
-                twoX();
+                initPoint(i -> 2 * i);
                 break;
             case "-2x":
-                negateTwoX();
+                initPoint(i -> -2 * i);
                 break;
             default:
                 break;
@@ -75,11 +73,16 @@ class ChartPane {
         stage.show();
         for (XYChart.Series<Number, Number> s : lineChart.getData()) {
             for (XYChart.Data<Number, Number> d : s.getData()) {
-                Tooltip.install(d.getNode(), new Tooltip(
+                StackPane node = (StackPane) d.getNode();
+                node.setPrefWidth(chartBean.getSize());
+                node.setPrefHeight(chartBean.getSize());
+                Tooltip tooltip = new Tooltip(
                         "x: " + d.getXValue().toString() + "\n" +
-                                type + ": " + d.getYValue()));
-                d.getNode().setOnMouseEntered(event -> d.getNode().getStyleClass().add("onHover"));
-                d.getNode().setOnMouseExited(event -> d.getNode().getStyleClass().remove("onHover"));
+                                chartBean.getType() + ": " + d.getYValue());
+                Tooltip.install(node, tooltip);
+                node.setCursor(Cursor.OPEN_HAND);
+                node.setOnMouseEntered(event -> node.getStyleClass().add("onHover"));
+                node.setOnMouseExited(event -> node.getStyleClass().remove("onHover"));
             }
         }
     }
@@ -88,95 +91,26 @@ class ChartPane {
     /**
      * 抽取代码，初始化画布
      */
-    private void init(String type) {
-        stage.setTitle(type + " 函数图");
+    private void init() {
+        stage.setTitle(chartBean.getType() + " 函数图");
         final NumberAxis xAxis = new NumberAxis();
         final NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel("x");
-        yAxis.setLabel(type);
+        yAxis.setLabel(chartBean.getType());
         lineChart = new LineChart<>(xAxis, yAxis);
-        lineChart.setTitle(type + " 函数图");
+        lineChart.setTitle(chartBean.getType() + " 函数图");
         series.setName("点");
     }
 
-    /**
-     * 函数 -2x
-     */
-    private void negateTwoX() {
-        for (double i = -10; i <= 10; i += stop) {
-            series.getData().add(new XYChart.Data<>(i, -2 * i));
+    private void initPoint(DoubleFunction<Double> getY) {
+        for (double i = chartBean.getStart(); i <= chartBean.getEnd(); i += chartBean.getStep()) {
+            series.getData().add(new XYChart.Data<>(i, getY.apply(i)));
         }
     }
 
-    /**
-     * 函数 2x
-     */
-    private void twoX() {
-        for (double i = -10; i <= 10; i += stop) {
-            series.getData().add(new XYChart.Data<>(i, 2 * i));
-        }
-    }
-
-    /**
-     * 函数 sin(x)
-     */
-    private void sinX() {
-        for (double i = -10; i <= 10; i += stop) {
-            series.getData().add(new XYChart.Data<>(i, sin(i)));
-        }
-    }
-
-    /**
-     * 函数 cos(x)
-     */
-    private void cosX() {
-        for (double i = -10; i <= 10; i += stop) {
-            series.getData().add(new XYChart.Data<>(i, cos(i)));
-        }
-    }
-
-    /**
-     * 函数 eˣ
-     */
-    private void ex() {
-        for (double i = -10; i <= 10; i += stop) {
-            series.getData().add(new XYChart.Data<>(E, pow(E, i)));
-        }
-    }
-
-    /**
-     * 函数 10ˣ
-     */
-    private void tenX() {
-        for (double i = -10; i <= 10; i += stop) {
-            series.getData().add(new XYChart.Data<>(i, pow(10, i)));
-        }
-    }
-
-    /**
-     * 函数 x²
-     */
-    private void showX2() {
-        for (double i = -10; i <= 10; i += stop) {
-            series.getData().add(new XYChart.Data<>(i, pow(i, 2)));
-        }
-    }
-
-    /**
-     * 函数 x³
-     */
-    private void showX3() {
-        for (double i = -10; i <= 10; i += stop) {
-            series.getData().add(new XYChart.Data<>(i, pow(i, 3)));
-        }
-    }
-
-    /**
-     * 函数 √x
-     */
-    private void showSqrtX() {
-        for (double i = 0; i <= 10; i += stop) {
-            series.getData().add(new XYChart.Data<>(i, sqrt(i)));
+    private void initPoint(DoubleSupplier getX, DoubleFunction<Double> getY) {
+        for (double i = chartBean.getStart(); i <= chartBean.getEnd(); i += chartBean.getStep()) {
+            series.getData().add(new XYChart.Data<>(getX.getAsDouble(), getY.apply(i)));
         }
     }
 
