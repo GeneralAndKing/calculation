@@ -103,7 +103,7 @@ class UiBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    public static void setTipTime(Tooltip tooltip, int millis) {
+    static void setTipTime(Tooltip tooltip, int millis) {
         try {
             Class tipClass = tooltip.getClass();
             Field f = tipClass.getDeclaredField("BEHAVIOR");
@@ -117,7 +117,7 @@ class UiBuilder {
         }
     }
 
-    private static boolean isInteger(String str) {
+    static boolean isInteger(String str) {
         return pattern.matcher(str).matches();
     }
 }

@@ -22,7 +22,6 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import javax.sound.midi.Sequence;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -42,6 +41,7 @@ public class Main extends Application {
     private SimpleListProperty<String> data;
     private FileController fileController;
     private ButtonController buttonController;
+    private TextField number;
     private ObservableMap<KeyCombination, Runnable> accelerators;
 
 
@@ -91,11 +91,26 @@ public class Main extends Application {
     }
 
     private void initResult() {
+        BorderPane other = new BorderPane();
+        other.getStyleClass().add("calc");
+        number = new TextField();
+        number.setPromptText("小数位数");
+        number.setMinHeight(50);
+        number.setPadding(new Insets(5));
+        number.textProperty().bindBidirectional(buttonController.numberProperty());
+        number.textProperty().addListener((ObservableValue<? extends String> observable,
+                                           String oldValue, String newValue) -> {
+            if (Objects.nonNull(newValue) && !isInteger(newValue)) {
+                number.setText(oldValue);
+            }
+        });
+        other.setTop(number);
+
         ListView<String> list = new ListView<>();
         list.setPadding(new Insets(0, 5, 0, 5));
         list.setItems(data);
         list.setPrefWidth(150);
-        list.setMaxHeight(300);
+        list.setMaxHeight(240);
         list.setOnMouseClicked(buttonController::listEvent);
         list.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
@@ -109,7 +124,8 @@ public class Main extends Application {
                 }
             }
         });
-        pane.setRight(list);
+        other.setCenter(list);
+        this.pane.setRight(other);
     }
 
     /**
@@ -140,7 +156,7 @@ public class Main extends Application {
         textField.setMinHeight(50);
         textField.setAlignment(Pos.CENTER_LEFT);
         textField.setFont(Font.font(null, FontWeight.BOLD, 20));
-        textField.textProperty().bindBidirectional(buttonController.textPropertyProperty());
+        textField.textProperty().bindBidirectional(buttonController.textProperty());
         textField.textProperty().addListener((ObservableValue<? extends String> observable,
                                               String oldValue, String newValue) -> {
             textField.selectPositionCaret(textField.getText().length());

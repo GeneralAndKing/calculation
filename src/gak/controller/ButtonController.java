@@ -10,13 +10,8 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * 按钮事件
@@ -27,12 +22,16 @@ import java.util.Optional;
 public class ButtonController extends Service<String> {
     private boolean isResult;
     private SimpleStringProperty textProperty;
+    private SimpleStringProperty numberProperty;
+    private SimpleStringProperty expressProperty;
     private Calculation calculation;
     private SimpleListProperty<String> data;
     private String memory = "";
 
     public ButtonController() {
         textProperty = new SimpleStringProperty("0");
+        numberProperty = new SimpleStringProperty(null);
+        expressProperty = new SimpleStringProperty(null);
         data = new SimpleListProperty<>(FXCollections.observableArrayList());
         calculation = new Calculation();
         isResult = false;
@@ -139,11 +138,10 @@ public class ButtonController extends Service<String> {
     @Override
     protected void succeeded() {
         super.succeeded();
-        String express = textProperty.get();
         String message = getMessage();
         textProperty.set(message);
         isResult = true;
-        data.add(String.format("%s=%s", express, message));
+        data.add(String.format("%s=%s", expressProperty.get(), message));
     }
 
     @Override
@@ -151,15 +149,24 @@ public class ButtonController extends Service<String> {
         return new Task<String>() {
             @Override
             protected String call() {
-                String result = calculation.calculate(textProperty.get());
+                expressProperty.set(textProperty.get());
+                Integer scale = 0;
+                if (Objects.nonNull(numberProperty.get()) && !numberProperty.get().isEmpty()) {
+                    scale = Integer.parseInt(numberProperty.get());
+                }
+                String result = calculation.calculate(textProperty.get(), scale);
                 updateMessage(result);
                 return result;
             }
         };
     }
 
-    public SimpleStringProperty textPropertyProperty() {
+    public SimpleStringProperty textProperty() {
         return textProperty;
+    }
+
+    public SimpleStringProperty numberProperty() {
+        return numberProperty;
     }
 
     public SimpleListProperty<String> dataProperty() {
