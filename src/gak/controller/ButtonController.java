@@ -71,6 +71,9 @@ public class ButtonController extends Service<String> {
         if (textProperty.isEqualTo("error").get()) {
             textProperty.set("0");
         }
+        if("0".equals(textProperty.get())){
+            textProperty.set("");
+        }
         if (userData instanceof Boolean && (Boolean) userData) {
             // 单目运算符
             textProperty.set(textProperty.concat(button.getText().toLowerCase() + "(").get());
