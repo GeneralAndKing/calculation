@@ -1,7 +1,5 @@
 package gak.calc;
 
-import javafx.scene.input.KeyCode;
-
 import java.math.BigDecimal;
 import java.util.Stack;
 
@@ -19,8 +17,10 @@ public class Calculation {
 
     public static void main(String[] args) {
         Calculation demo = new Calculation();
-        System.out.println(demo.calculate("negate(50000!)+50000!"));
-        System.out.println(demo.calculate("cos(3)"));
+        long start = System.currentTimeMillis();
+        System.out.println(demo.calculate("500000!"));
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
     }
 
     /**
