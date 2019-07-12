@@ -68,6 +68,9 @@ public class ButtonController extends Service<String> {
     private void optionEvent(ActionEvent event) {
         Button button = (Button) event.getSource();
         Object userData = button.getUserData();
+        if (textProperty.isEqualTo("error").get()) {
+            textProperty.set("0");
+        }
         if (userData instanceof Boolean && (Boolean) userData) {
             // 单目运算符
             textProperty.set(textProperty.concat(button.getText().toLowerCase() + "(").get());
