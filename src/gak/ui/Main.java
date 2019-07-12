@@ -30,6 +30,9 @@ import static gak.ui.UiBuilder.*;
 
 /**
  * 图形界面主界面
+ *
+ * @author <a href="https://echocow.cn">EchoCow</a>
+ * @date 19-7-9 上午11:39
  */
 public class Main extends Application {
     private Scene scene;

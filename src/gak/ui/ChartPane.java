@@ -16,6 +16,9 @@ import static java.lang.Math.*;
 
 /**
  * 图表主界面
+ *
+ * @author <a href="https://echocow.cn">EchoCow</a>
+ * @date 19-7-9 上午11:39
  */
 class ChartPane {
     private Stage stage;
