@@ -89,6 +89,9 @@ public class ButtonController extends Service<String> {
     public void equalEvent(ActionEvent actionEvent) {
         try {
             // 忽略初始时报错（不影响运行）
+            if (isRunning()){
+                cancel();
+            }
             reset();
             start();
         } catch (Exception ignored) {
